@@ -1,0 +1,220 @@
+---
+title: "Project 1"
+author: "SDS348 Fall 2019"
+date: ""
+output:
+  html_document: default
+  pdf_document: default
+---
+
+
+
+<div id="ann-wang-aw29983" class="section level2">
+<h2>Ann Wang, aw29983</h2>
+<blockquote>
+<ul>
+<li>Click the “Knit” button (above) to create an .html file</li>
+<li>Open the html file in your internet browser to view</li>
+<li>Go to <code>File &gt; Print</code> and print your .html file to a .pdf</li>
+<li>(or knit to PDF)</li>
+<li>Upload the .pdf file to Canvas</li>
+</ul>
+</blockquote>
+<hr />
+<div id="necessary-packages" class="section level3">
+<h3>Necessary Packages:</h3>
+<pre class="r"><code>library(datasets)
+#install.packages(&quot;tidyverse&quot;)
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(cluster)</code></pre>
+<p>###Introduction
+I choose the datasets about the types of arrests in the United States and specific descriptives about each state. The ‘USArrests’ dataset contains the variables: State, Murder, Assault, Urban Pop, and Rape. The ‘state.x77’ dataset contains the variables: State, Population, Income, Illiteracy, Life Exp, Murder, HS Grad, Frost, and Area. I obtained both these datasets by using ’library(datasets)’and I thought it’d be interesting to see differences between the states with variables I don’t commonly think about. I do expect a higher assualt incidence to be associated with a higher illiteracy rate.</p>
+</div>
+<div id="tidying-and-joining-dataset" class="section level3">
+<h3>Tidying and Joining Dataset:</h3>
+<pre class="r"><code>Arrests&lt;-setNames(cbind(rownames(USArrests), USArrests, row.names = NULL), 
+         c(&quot;State&quot;, &quot;Murder&quot;, &quot;Assault&quot;, &quot;Urban Pop&quot;, &quot;Rape&quot;))
+state &lt;- setNames(cbind(rownames(state.x77), state.x77, row.names = NULL), 
+         c(&quot;State&quot;, &quot;Population&quot;, &quot;Income&quot;, &quot;Illiteracy&quot;, &quot;Life Exp&quot;, &quot;Murder&quot;, &quot;HS Grad&quot;, &quot;Frost&quot;, &quot;Area&quot;))
+colnames(state)&lt;-c(&quot;State&quot;, &quot;Population&quot;, &quot;Income&quot;, &quot;Illiteracy&quot;, &quot;Life Exp&quot;, &quot;Murder&quot;, &quot;HS Grad&quot;, &quot;Frost&quot;, &quot;Area&quot;)
+state &lt;- as.data.frame((state))
+
+full&lt;-full_join(Arrests, state, by = &quot;State&quot;)</code></pre>
+<pre><code>## Warning: Column `State` has different attributes on LHS and RHS of join</code></pre>
+<pre class="r"><code>#fulldata&lt;- Arrests%&gt;%arrange(State)%&gt;%bind_cols(arrange(state,State))
+#full$`HS Grad`&lt;-as.numeric(as.character(full$`HS Grad`))
+
+selected&lt;- full  %&gt;% select(-Murder.y) %&gt;% mutate(assault_incidence = case_when(Assault &gt; 170 ~ &quot;High&quot;, Assault &lt;=170~&quot;Low&quot;))
+selected&lt;-selected %&gt;% mutate_at(2:12,function(x)as.numeric(as.character(x)))
+
+as.data.frame(head(selected))</code></pre>
+<pre><code>##        State Murder.x Assault Urban Pop Rape Population Income Illiteracy
+## 1    Alabama     13.2     236        58 21.2       3615   3624        2.1
+## 2     Alaska     10.0     263        48 44.5        365   6315        1.5
+## 3    Arizona      8.1     294        80 31.0       2212   4530        1.8
+## 4   Arkansas      8.8     190        50 19.5       2110   3378        1.9
+## 5 California      9.0     276        91 40.6      21198   5114        1.1
+## 6   Colorado      7.9     204        78 38.7       2541   4884        0.7
+##   Life Exp HS Grad Frost   Area assault_incidence
+## 1    69.05    41.3    20  50708              High
+## 2    69.31    66.7   152 566432              High
+## 3    70.55    58.1    15 113417              High
+## 4    70.66    39.9    65  51945              High
+## 5    71.71    62.6    20 156361              High
+## 6    72.06    63.9   166 103766              High</code></pre>
+<pre class="r"><code>untidy&lt;-selected %&gt;% pivot_wider(names_from = &quot;assault_incidence&quot;, values_from = &quot;Assault&quot;)
+tidy&lt;- untidy %&gt;% pivot_longer(cols = c(&quot;High&quot;, &quot;Low&quot;), names_to = &quot;assault_incididence&quot;, values_to = &quot;Assault&quot;)</code></pre>
+<p>First, I had to rename the columns, so that the two datasets shared the same exact column name. Full join was used because I wanted to keep all of the data and ‘State’ was a common variable between the two datasets. There were 0 cases dropped from joining. One potential problem was that this created a lot of variables to work with. If the datasets were to contain a lot more variables, I could see how full_join could create a large,messy dataset.</p>
+<p>I created the ‘selected’ dataset to tidy up and to focus on variables of interest. I also turned selected variables in the dataset ‘selected’ into numerics from factors. I then used pivot_wider to make the data untidy and pivot_longer to make it tidy again to show use of the two functions. I untidied based on a categorical variable I made named ‘assault_incidence’ and values from ‘assault’. I then retided based on the same variables.</p>
+</div>
+<div id="summary-statistics-and-wrangling" class="section level3">
+<h3>Summary Statistics and Wrangling</h3>
+<pre class="r"><code>moddata1&lt;-full %&gt;% filter(State == &quot;Alabama&quot;)%&gt;% select(Assault, Income)
+as.data.frame(head(moddata1))%&gt;% mutate(assault_incidence = case_when(Assault &gt; 170 ~ &quot;high&quot;, Assault &lt;=170~&quot;low&quot;))</code></pre>
+<pre><code>##   Assault Income assault_incidence
+## 1     236   3624              high</code></pre>
+<pre class="r"><code>as.data.frame(head(moddata1))</code></pre>
+<pre><code>##   Assault Income
+## 1     236   3624</code></pre>
+<pre class="r"><code>moddata2&lt;-full %&gt;% group_by(State) %&gt;% arrange(desc(`Urban Pop`)) %&gt;% mutate(Rape_per_UrbanPo=Rape/`Urban Pop`)
+as.data.frame(head(moddata2))</code></pre>
+<pre><code>##           State Murder.x Assault Urban Pop Rape Population Income
+## 1    California      9.0     276        91 40.6      21198   5114
+## 2    New Jersey      7.4     159        89 18.8       7333   5237
+## 3  Rhode Island      3.4     174        87  8.3        931   4558
+## 4      New York     11.1     254        86 26.1      18076   4903
+## 5 Massachusetts      4.4     149        85 16.3       5814   4755
+## 6        Hawaii      5.3      46        83 20.2        868   4963
+##   Illiteracy Life Exp Murder.y HS Grad Frost   Area Rape_per_UrbanPo
+## 1        1.1    71.71     10.3    62.6    20 156361        0.4461538
+## 2        1.1    70.93      5.2    52.5   115   7521        0.2112360
+## 3        1.3     71.9      2.4    46.4   127   1049        0.0954023
+## 4        1.4    70.55     10.9    52.7    82  47831        0.3034884
+## 5        1.1    71.83      3.3    58.5   103   7826        0.1917647
+## 6        1.9     73.6      6.2    61.9     0   6425        0.2433735</code></pre>
+<pre class="r"><code>selected %&gt;% summarize(mean_Income = mean(Income),sd_Income = sd(Income), variance = var(Income, y = NULL, na.rm = FALSE) , count_Income= n(), quantile =qnorm(p =0.5, mean = mean_Income, sd= sd_Income), min_Income=min(Income), max_Income=max(Income), distinct_Income= n_distinct(Income), cor = cor(Murder.x, Income))</code></pre>
+<pre><code>##   mean_Income sd_Income variance count_Income quantile min_Income
+## 1      4435.8  614.4699 377573.3           50   4435.8       3098
+##   max_Income distinct_Income       cor
+## 1       6315              50 -0.215205</code></pre>
+<pre class="r"><code>selected %&gt;% group_by(assault_incidence) %&gt;% summarize(mean_murder = mean(Murder.x), sd_murder = sd(Murder.x), min_Murder = min(Murder.x), max_murder = max(Murder.x), variance = var(Murder.x, y = NULL, na.rm = FALSE))</code></pre>
+<pre><code>## # A tibble: 2 x 6
+##   assault_incidence mean_murder sd_murder min_Murder max_murder variance
+##   &lt;chr&gt;                   &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;    &lt;dbl&gt;
+## 1 High                    11.4       3.37        3.4       17.4    11.3 
+## 2 Low                      4.74      2.28        0.8        9.7     5.19</code></pre>
+<p>‘Moddata1’ and ‘moddata2’ shows use of six dplyr functions (ﬁlter, select, arrange, group_by, mutate, summarize). I used mutate to find the proportion of Rape and Urban Population. Then I used the summarize function is used to show the ‘mean’, ‘sd’, and other applicable functions.</p>
+<p>Based on the data produced, mean of income is 4435.8 per capita, standard deviation is 614.4699, variance is 377573.3, total count is 50, at a probability of 0.5, the cut off is 4435.8, the minimum is 3098, the maximum is 6315, there are 50 different distinct incomes, and there is a negative correlation between income and murder incidence.These results are fairly expected because I did anticipate there being a negative correlation between the income levels and the murder arrests. Additionally, when based on high assault incidence, the mean murder rate is 11.36, sd is 3.368, minimum is 3.4, max is 17.4, and variance is 11347. When based on low assault incidence, the mean is 4.74, sd is 2.277, minimum is 0.8, maximum is 9.7, and variance is 5.18. Overall for higher assault incidence, the average, the minimum, and the maximum murder rate is higher.</p>
+</div>
+<div id="make-visulizations" class="section level3">
+<h3>Make Visulizations</h3>
+<pre class="r"><code>ggplot(selected, aes(Income, Illiteracy)) + 
+  geom_point(aes(color = assault_incidence))+ 
+  xlab(&quot;Income as of July 1, 1974 (per capita)&quot;)+
+  ylab(&quot;Illiteracy (%)&quot;) + 
+  labs(colour = &quot;Assault Incidence&quot;)+
+  theme(axis.text.x = element_text(angle=45, hjust=1))+
+  ggtitle(&quot;Income and Illiteracy Percentage&quot;)+
+  scale_y_continuous(breaks=seq(0,3,0.5))+
+  theme( axis.line = element_line(colour = &quot;darkblue&quot;, 
+                      size = 0.5, linetype = &quot;solid&quot;))+
+  scale_color_manual(values=c(&quot;#E69F00&quot;, &quot;#56B4E9&quot;))</code></pre>
+<p><img src="/Project1_files/figure-html/unnamed-chunk-4-1.png" width="768" style="display: block; margin: auto;" />
+This graph shows a plot between income levels, illiteracy percentage, and the assault incidence. The income is as of July 1, 1974. As the income per capita increases, the illiteracy rate falls. A higher assault incidence is associated with a higher illiteracy rate. It is more unclear of the relationship between assault incidence and income. I made a plot with geom_point and then renamed both the axis. I then changed the labels on the x-axis for better readability. Then I added a title and added more tick marks to the y-axis. I also changed one theme element by changing the axis line to a dark blue color. Lastly, I changed the color of the points reflecting the assault incidence.</p>
+<pre class="r"><code>selectedf&lt;-selected%&gt;% mutate(Frost_Occurrence = case_when(Frost&gt;156 ~ &quot;Often&quot;, Frost&lt;=156 &amp; Frost&gt;=52 ~&quot;Average&quot;, Frost&lt;52~&quot;Below Average&quot;))
+
+ggplot(selectedf, aes(Frost_Occurrence,y=Rape, fill = `Frost_Occurrence`))+
+  geom_bar(stat=&quot;summary&quot;, fun.y=&quot;mean&quot;) +  
+  geom_errorbar(stat=&quot;summary&quot;)+
+  theme(axis.text.x = element_text(angle=0, hjust=0.5))+
+  ggtitle(&quot;Frost Occurrence and Rape Arrests&quot;)+
+  ylab(&quot;Rape Arrests (per 100,000)&quot;)+
+  xlab(&quot;Frost Occurrence&quot;)+
+  labs(colour = &quot;Frost Occurence&quot;)+
+  scale_y_continuous(breaks=seq(0,30,5))+
+  scale_x_discrete(limits=c(&quot;Below Average&quot;,&quot;Average&quot;,&quot;Often&quot;))+
+  scale_fill_manual(values=c(&quot;#66CC99&quot;, &quot;#E69F00&quot;, &quot;#56B4E9&quot;))+
+  theme_bw()</code></pre>
+<p><img src="/Project1_files/figure-html/unnamed-chunk-5-1.png" width="768" style="display: block; margin: auto;" />
+The graph plots the occurence of frost days with the number of rape arrests along with a standard errorbar. Based on the the graph, the more often there are frost days (days below the freezing point), the fewer rape arrests there are. The standard error bars shows the measure of the spread per variable for frost occurrence. The errorbar is the largest for frost occurrence that is the most often. I also used ‘stat=“summary”’ for the error bar. I added a title, changed the axis labels, added tick marks to the y-axis, changed the color of the bars, and the theme.</p>
+<pre class="r"><code>ggplot(selected, aes(State))+
+  geom_bar(aes(y=Rape, fill = State),stat=&quot;summary&quot;, fun.y=&quot;mean&quot;) +  
+  theme(axis.text.x = element_text(angle=55, hjust=1))+
+  ylab(&quot;Rape Arrests (per 100,000)&quot;)+
+  ggtitle(&quot;Rape Arrests per State&quot;)+
+  theme(legend.position=&quot;none&quot;)</code></pre>
+<p><img src="/Project1_files/figure-html/unnamed-chunk-6-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p>The plot was mainly plotted for self entertainment. It shows the number of rape arrests for each individual state. I changed the color of the plot and the angel of the x-axis labels.</p>
+</div>
+<div id="perform-k-meanspam-clustering" class="section level3">
+<h3>Perform k-means/PAM clustering</h3>
+<pre class="r"><code>wss&lt;-vector()
+for(i in 1:10){ 
+  temp&lt;-selected%&gt;%dplyr::select(Murder.x,Assault, `Urban Pop`, Rape, Population, Income,`Illiteracy`,`Life Exp`, `HS Grad`, Frost, Area)%&gt;%
+  kmeans(.,i)
+  wss[i]&lt;-temp$tot.withinss 
+} 
+
+ggplot()+geom_point(aes(x=1:10,y=wss))+geom_path(aes(x=1:10,y=wss))+  xlab(&quot;clusters&quot;)+scale_x_continuous(breaks=1:10)</code></pre>
+<p><img src="/Project1_files/figure-html/unnamed-chunk-7-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>clust_dat&lt;-selected%&gt;%dplyr::select(Murder.x,Assault, `Urban Pop`, Rape, Population, Income,`Illiteracy`,`Life Exp`, `HS Grad`, Frost, Area)
+kmeans1&lt;-clust_dat %&gt;% scale %&gt;%kmeans(3)
+kmeansclust&lt;-clust_dat%&gt;%mutate(cluster=as.factor(kmeans1$cluster))
+kmeansclust%&gt;%ggplot(aes(Income, Murder.x, color=cluster))+geom_point()</code></pre>
+<p><img src="/Project1_files/figure-html/unnamed-chunk-7-2.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>kmeansclust%&gt;%mutate(Assault_incidence = selected$assault_incidence)%&gt;%
+  ggplot(aes(Murder.x, Income, color=Assault_incidence, shape=cluster))+geom_point(size=4)+ggtitle(&quot;Cluster using kmeans&quot;)</code></pre>
+<p><img src="/Project1_files/figure-html/unnamed-chunk-7-3.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>pam1&lt;-clust_dat%&gt;%pam(k=3)
+pamclust&lt;-clust_dat%&gt;%mutate(cluster=as.factor(pam1$clustering))
+pamclust%&gt;%ggplot(aes(Income, Murder.x,color=cluster))+geom_point()</code></pre>
+<p><img src="/Project1_files/figure-html/unnamed-chunk-7-4.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>pamclust%&gt;%group_by(cluster)%&gt;%summarize_if(is.numeric,mean,na.rm=T)</code></pre>
+<pre><code>## # A tibble: 3 x 12
+##   cluster Murder.x Assault `Urban Pop`  Rape Population Income Illiteracy
+##   &lt;fct&gt;      &lt;dbl&gt;   &lt;dbl&gt;       &lt;dbl&gt; &lt;dbl&gt;      &lt;dbl&gt;  &lt;dbl&gt;      &lt;dbl&gt;
+## 1 1           8.58    173.        64.7  18.7      4884.  4336.       1.33
+## 2 2          10       263         48    44.5       365   6315        1.5 
+## 3 3           6.42    162.        67.8  24.0      3445.  4494.       0.9 
+## # ... with 4 more variables: `Life Exp` &lt;dbl&gt;, `HS Grad` &lt;dbl&gt;,
+## #   Frost &lt;dbl&gt;, Area &lt;dbl&gt;</code></pre>
+<p>First, I determined the number of clusters I should use and based on the graph, I decided that 3 clusters will better encompass my data. I used kmeans to create my cluster graph. While it is tough to spot, I can see that one cluster is shows that a higher murder rate is associated with a lower income level and a higher assault incidence. It is difficult to interpret other associations based on the cluster itself. I also ran PAM to see if there would be any other associations though I could not see any associations based on PAM.</p>
+<pre><code>## R version 3.6.1 (2019-07-05)
+## Platform: x86_64-w64-mingw32/x64 (64-bit)
+## Running under: Windows 10 x64 (build 17134)
+## 
+## Matrix products: default
+## 
+## locale:
+## [1] LC_COLLATE=English_United States.1252 
+## [2] LC_CTYPE=English_United States.1252   
+## [3] LC_MONETARY=English_United States.1252
+## [4] LC_NUMERIC=C                          
+## [5] LC_TIME=English_United States.1252    
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+## [1] cluster_2.1.0 ggplot2_3.2.1 dplyr_0.8.3   tidyr_1.0.0   knitr_1.25   
+## 
+## loaded via a namespace (and not attached):
+##  [1] Rcpp_1.0.2       pillar_1.4.2     compiler_3.6.1   tools_3.6.1     
+##  [5] zeallot_0.1.0    digest_0.6.21    evaluate_0.14    tibble_2.1.3    
+##  [9] lifecycle_0.1.0  gtable_0.3.0     pkgconfig_2.0.3  rlang_0.4.0     
+## [13] cli_1.1.0        yaml_2.2.0       blogdown_0.17    xfun_0.10       
+## [17] withr_2.1.2      stringr_1.4.0    vctrs_0.2.0      grid_3.6.1      
+## [21] tidyselect_0.2.5 glue_1.3.1       R6_2.4.0         fansi_0.4.0     
+## [25] rmarkdown_1.16   bookdown_0.16    purrr_0.3.2      magrittr_1.5    
+## [29] backports_1.1.5  scales_1.0.0     htmltools_0.3.6  assertthat_0.2.1
+## [33] colorspace_1.4-1 labeling_0.3     utf8_1.1.4       stringi_1.4.3   
+## [37] lazyeval_0.2.2   munsell_0.5.0    crayon_1.3.4</code></pre>
+<pre><code>## [1] &quot;2019-12-06 12:02:17 CST&quot;</code></pre>
+<pre><code>##           sysname           release           version          nodename 
+##         &quot;Windows&quot;          &quot;10 x64&quot;     &quot;build 17134&quot; &quot;WINDOWS-01O3VTU&quot; 
+##           machine             login              user    effective_user 
+##          &quot;x86-64&quot;               &quot;A&quot;               &quot;A&quot;               &quot;A&quot;</code></pre>
+</div>
+</div>

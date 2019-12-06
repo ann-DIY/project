@@ -1,0 +1,165 @@
+---
+title: "Project 1"
+author: "SDS348 Fall 2019"
+date: ""
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r global_options, include=FALSE}
+library(knitr)
+opts_chunk$set(fig.align="center", fig.height=5, message=FALSE, fig.width=8,tidy.opts=list(width.cutoff=60),tidy=TRUE)
+```
+
+## Ann Wang, aw29983
+
+> - Click the "Knit" button (above) to create an .html file
+> - Open the html file in your internet browser to view
+> - Go to `File > Print` and print your .html file to a .pdf
+> - (or knit to PDF)
+> - Upload the .pdf file to Canvas
+
+---
+
+### Necessary Packages:
+```{R}
+library(datasets)
+#install.packages("tidyverse")
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(cluster)
+```
+
+###Introduction
+I choose the datasets about the types of arrests in the United States and specific descriptives about each state. The 'USArrests' dataset contains the variables: State, Murder, Assault, Urban Pop, and Rape. The 'state.x77' dataset contains the variables: State, Population, Income, Illiteracy, Life Exp, Murder, HS Grad, Frost, and Area. I obtained both these datasets by using 'library(datasets)'and I thought it'd be interesting to see differences between the states with variables I don't commonly think about. I do expect a higher assualt incidence to be associated with a higher illiteracy rate. 
+
+### Tidying and Joining Dataset:
+```{R}
+Arrests<-setNames(cbind(rownames(USArrests), USArrests, row.names = NULL), 
+         c("State", "Murder", "Assault", "Urban Pop", "Rape"))
+state <- setNames(cbind(rownames(state.x77), state.x77, row.names = NULL), 
+         c("State", "Population", "Income", "Illiteracy", "Life Exp", "Murder", "HS Grad", "Frost", "Area"))
+colnames(state)<-c("State", "Population", "Income", "Illiteracy", "Life Exp", "Murder", "HS Grad", "Frost", "Area")
+state <- as.data.frame((state))
+
+full<-full_join(Arrests, state, by = "State")
+
+#fulldata<- Arrests%>%arrange(State)%>%bind_cols(arrange(state,State))
+#full$`HS Grad`<-as.numeric(as.character(full$`HS Grad`))
+
+selected<- full  %>% select(-Murder.y) %>% mutate(assault_incidence = case_when(Assault > 170 ~ "High", Assault <=170~"Low"))
+selected<-selected %>% mutate_at(2:12,function(x)as.numeric(as.character(x)))
+
+as.data.frame(head(selected))
+untidy<-selected %>% pivot_wider(names_from = "assault_incidence", values_from = "Assault")
+tidy<- untidy %>% pivot_longer(cols = c("High", "Low"), names_to = "assault_incididence", values_to = "Assault")
+```
+
+First, I had to rename the columns, so that the two datasets shared the same exact column name. Full join was used because I wanted to keep all of the data and 'State' was a common variable between the two datasets. There were 0 cases dropped from joining. One potential problem was that this created a lot of variables to work with. If the datasets were to contain a lot more variables, I could see how full_join could create a large,messy dataset.
+
+I created the 'selected' dataset to tidy up and to focus on variables of interest. I also turned selected variables in the dataset 'selected' into numerics from factors. I then used pivot_wider to make the data untidy and pivot_longer to make it tidy again to show use of the two functions. I untidied based on a categorical variable I made named 'assault_incidence' and values from 'assault'. I then retided based on the same variables.
+
+### Summary Statistics and Wrangling
+
+```{R}
+moddata1<-full %>% filter(State == "Alabama")%>% select(Assault, Income)
+as.data.frame(head(moddata1))%>% mutate(assault_incidence = case_when(Assault > 170 ~ "high", Assault <=170~"low"))
+as.data.frame(head(moddata1))
+
+moddata2<-full %>% group_by(State) %>% arrange(desc(`Urban Pop`)) %>% mutate(Rape_per_UrbanPo=Rape/`Urban Pop`)
+as.data.frame(head(moddata2))
+
+selected %>% summarize(mean_Income = mean(Income),sd_Income = sd(Income), variance = var(Income, y = NULL, na.rm = FALSE) , count_Income= n(), quantile =qnorm(p =0.5, mean = mean_Income, sd= sd_Income), min_Income=min(Income), max_Income=max(Income), distinct_Income= n_distinct(Income), cor = cor(Murder.x, Income))
+
+selected %>% group_by(assault_incidence) %>% summarize(mean_murder = mean(Murder.x), sd_murder = sd(Murder.x), min_Murder = min(Murder.x), max_murder = max(Murder.x), variance = var(Murder.x, y = NULL, na.rm = FALSE))
+```
+
+'Moddata1' and 'moddata2' shows use of six dplyr functions (ﬁlter, select, arrange, group_by, mutate, summarize). I used mutate to find the proportion of Rape and Urban Population. Then I used the summarize function is used to show the 'mean', 'sd', and other applicable functions. 
+
+Based on the data produced, mean of income is 4435.8 per capita, standard deviation is 614.4699, variance is 377573.3, total count is 50, at a probability of 0.5, the cut off is 4435.8, the minimum is 3098, the maximum is 6315, there are 50 different distinct incomes, and there is a negative correlation between income and murder incidence.These results are fairly expected because I did anticipate there being a negative correlation between the income levels and the murder arrests. Additionally, when based on high assault incidence, the mean murder rate is 11.36, sd is 3.368, minimum is 3.4, max is 17.4, and variance is 11347. When based on low assault incidence, the mean is 4.74, sd is 2.277, minimum is 0.8, maximum is 9.7, and variance is 5.18. Overall for higher assault incidence, the average, the minimum, and the maximum murder rate is higher. 
+
+
+### Make Visulizations
+
+```{R}
+ggplot(selected, aes(Income, Illiteracy)) + 
+  geom_point(aes(color = assault_incidence))+ 
+  xlab("Income as of July 1, 1974 (per capita)")+
+  ylab("Illiteracy (%)") + 
+  labs(colour = "Assault Incidence")+
+  theme(axis.text.x = element_text(angle=45, hjust=1))+
+  ggtitle("Income and Illiteracy Percentage")+
+  scale_y_continuous(breaks=seq(0,3,0.5))+
+  theme( axis.line = element_line(colour = "darkblue", 
+                      size = 0.5, linetype = "solid"))+
+  scale_color_manual(values=c("#E69F00", "#56B4E9"))
+  
+```
+This graph shows a plot between income levels, illiteracy percentage, and the assault incidence. The income is as of July 1, 1974. As the income per capita increases, the illiteracy rate falls. A higher assault incidence is associated with a higher illiteracy rate. It is more unclear of the relationship between assault incidence and income. I made a plot with geom_point and then renamed both the axis. I then changed the labels on the x-axis for better readability. Then I added a title and added more tick marks to the y-axis. I also changed one theme element by changing the axis line to a dark blue color. Lastly, I changed the color of the points reflecting the assault incidence. 
+
+```{R}
+selectedf<-selected%>% mutate(Frost_Occurrence = case_when(Frost>156 ~ "Often", Frost<=156 & Frost>=52 ~"Average", Frost<52~"Below Average"))
+
+ggplot(selectedf, aes(Frost_Occurrence,y=Rape, fill = `Frost_Occurrence`))+
+  geom_bar(stat="summary", fun.y="mean") +  
+  geom_errorbar(stat="summary")+
+  theme(axis.text.x = element_text(angle=0, hjust=0.5))+
+  ggtitle("Frost Occurrence and Rape Arrests")+
+  ylab("Rape Arrests (per 100,000)")+
+  xlab("Frost Occurrence")+
+  labs(colour = "Frost Occurence")+
+  scale_y_continuous(breaks=seq(0,30,5))+
+  scale_x_discrete(limits=c("Below Average","Average","Often"))+
+  scale_fill_manual(values=c("#66CC99", "#E69F00", "#56B4E9"))+
+  theme_bw()
+```
+The graph plots the occurence of frost days with the number of rape arrests along with a standard errorbar. Based on the the graph, the more often there are frost days (days below the freezing point), the fewer rape arrests there are. The standard error bars shows the measure of the spread per variable for frost occurrence. The errorbar is the largest for frost occurrence that is the most often. I also used 'stat="summary"' for the error bar. I added a title, changed the axis labels, added tick marks to the y-axis, changed the color of the bars, and the theme. 
+
+
+```{R}
+ggplot(selected, aes(State))+
+  geom_bar(aes(y=Rape, fill = State),stat="summary", fun.y="mean") +  
+  theme(axis.text.x = element_text(angle=55, hjust=1))+
+  ylab("Rape Arrests (per 100,000)")+
+  ggtitle("Rape Arrests per State")+
+  theme(legend.position="none")
+```
+
+The plot was mainly plotted for self entertainment. It shows the number of rape arrests for each individual state. I changed the color of the plot and the angel of the x-axis labels. 
+
+### Perform k-means/PAM clustering
+
+```{R}
+wss<-vector()
+for(i in 1:10){ 
+  temp<-selected%>%dplyr::select(Murder.x,Assault, `Urban Pop`, Rape, Population, Income,`Illiteracy`,`Life Exp`, `HS Grad`, Frost, Area)%>%
+  kmeans(.,i)
+  wss[i]<-temp$tot.withinss 
+} 
+
+ggplot()+geom_point(aes(x=1:10,y=wss))+geom_path(aes(x=1:10,y=wss))+  xlab("clusters")+scale_x_continuous(breaks=1:10)
+
+
+clust_dat<-selected%>%dplyr::select(Murder.x,Assault, `Urban Pop`, Rape, Population, Income,`Illiteracy`,`Life Exp`, `HS Grad`, Frost, Area)
+kmeans1<-clust_dat %>% scale %>%kmeans(3)
+kmeansclust<-clust_dat%>%mutate(cluster=as.factor(kmeans1$cluster))
+kmeansclust%>%ggplot(aes(Income, Murder.x, color=cluster))+geom_point()
+
+kmeansclust%>%mutate(Assault_incidence = selected$assault_incidence)%>%
+  ggplot(aes(Murder.x, Income, color=Assault_incidence, shape=cluster))+geom_point(size=4)+ggtitle("Cluster using kmeans")
+
+pam1<-clust_dat%>%pam(k=3)
+pamclust<-clust_dat%>%mutate(cluster=as.factor(pam1$clustering))
+pamclust%>%ggplot(aes(Income, Murder.x,color=cluster))+geom_point()
+pamclust%>%group_by(cluster)%>%summarize_if(is.numeric,mean,na.rm=T)
+```
+First, I determined the number of clusters I should use and based on the graph, I decided that 3 clusters will better encompass my data. I used kmeans to create my cluster graph. While it is tough to spot, I can see that one cluster is shows that a higher murder rate is associated with a lower income level and a higher assault incidence. It is difficult to interpret other associations based on the cluster itself. I also ran PAM to see if there would be any other associations though I could not see any associations based on PAM. 
+
+```{R, echo=F}
+## DO NOT DELETE THIS BLOCK!
+sessionInfo()
+Sys.time()
+Sys.info()
+```
