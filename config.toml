@@ -7,7 +7,7 @@ googleAnalytics = ""
 
 [params]
     author = "Ann Wang"
-    description = "Links to the Projects are provided in the projects tab."
+    description = " The Resume Page will link you to the original page. Links to the Projects are provided in the tabs above."
     githubUsername = "#"
     accent = "blue"
     showBorder = true
@@ -38,7 +38,7 @@ googleAnalytics = ""
     weight = 4
     
 [[menu.main]]
-    url = "/2019-12-07-interesting-in-python/"
+    url = "/hugoisforlovers/"
     name = "Blog Post"
     weight = 5
 

@@ -48,12 +48,21 @@
     </item>
     
     <item>
+      <title>Blog</title>
+      <link>/post/blog/</link>
+      <pubDate>Sat, 07 Dec 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/post/blog/</guid>
+      <description>Hellow world</description>
+    </item>
+    
+    <item>
       <title>Interesting in Python</title>
       <link>/post/interesting-in-python/</link>
       <pubDate>Sat, 07 Dec 2019 00:00:00 +0000</pubDate>
       
       <guid>/post/interesting-in-python/</guid>
-      <description></description>
+      <description>helloo</description>
     </item>
     
     <item>
