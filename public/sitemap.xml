@@ -19,17 +19,12 @@
   </url>
   
   <url>
-    <loc>/post/blog/</loc>
+    <loc>/blog/</loc>
     <lastmod>2019-12-07T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/post/interesting-in-python/</loc>
-    <lastmod>2019-12-07T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/</loc>
+    <loc>/interesting-in-python/</loc>
     <lastmod>2019-12-07T00:00:00+00:00</lastmod>
   </url>
   
@@ -44,7 +39,7 @@
   </url>
   
   <url>
-    <loc>/post/hugoisforlovers/</loc>
+    <loc>/hugoisforlovers/</loc>
     <lastmod>2014-04-02T00:00:00+00:00</lastmod>
   </url>
   
