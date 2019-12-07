@@ -36,6 +36,11 @@ googleAnalytics = ""
     url = "/Project2/"
     name = "Project 2"
     weight = 4
+    
+[[menu.main]]
+    url = "/2019-12-07-interesting-in-python/"
+    name = "Blog Post"
+    weight = 5
 
 # The list of available icons can be found at http://fontawesome.io/icons.
 
