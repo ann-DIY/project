@@ -23,7 +23,7 @@ This is the 'meteorites' dataset, which is a dataset containing information abou
 ##### MANOVA TESTING
 
 ```{R}
-library(mvtnorm); library(ggExtra); library(ggplot2);library(dplyr); library(tidyverse); library(lmtest)
+library(mvtnorm); library(ggplot2);library(dplyr); library(tidyverse); library(lmtest)
 #install.packages("glmnet")
 library(glmnet)
 meteorites <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-06-11/meteorites.csv") %>% na.omit

@@ -122,22 +122,13 @@ Follow the following steps:
     </item>
     
     <item>
-      <title>Project 2: Modeling, Testing, and Predicting</title>
+      <title>Project 2</title>
       <link>/project2/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/project2/</guid>
-      <description>ModelingInstructionsA knitted R Markdown document (as a PDF) and the raw R Markdown file (as .Rmd) should both be submitted to Canvas by 11:59pm on 11/24/2019. These two documents will be graded jointly, so they must be consistent (i.e., don’t change the R Markdown file without also updating the knitted document). Knit an html copy too, for later! In the .Rmd file for Project 2, you can copy the first code-chunk into your project .</description>
-    </item>
-    
-    <item>
-      <title>Project2</title>
-      <link>/project2.1/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/project2.1/</guid>
-      <description>##Project2
-Project 2</description>
+      <description>Ann Wang, aw29983Introduction:This is the ‘meteorites’ dataset, which is a dataset containing information about meteorites and where they fell. This dataset was obtained from the Meteoritical Society by NASA. It contains the variables: name, id, name_type, class, mass, fall, year, lat, long, and geolocation of the meteorites.
+MANOVA TESTINGlibrary(mvtnorm); library(ggplot2);library(dplyr); library(tidyverse); library(lmtest)#install.packages(&amp;quot;glmnet&amp;quot;)library(glmnet)meteorites &amp;lt;- readr::read_csv(&amp;quot;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-06-11/meteorites.csv&amp;quot;) %&amp;gt;% na.omitggplot(meteorites, aes(x = year, y = mass)) + geom_point(alpha = .</description>
     </item>
     
   </channel>
