@@ -29,7 +29,7 @@ googleAnalytics = ""
 
 [[menu.main]]
     url = "/Project1/"
-    name = "Project1"
+    name = "Project 1"
     weight = 3
     
 [[menu.main]]
@@ -40,22 +40,17 @@ googleAnalytics = ""
 # The list of available icons can be found at http://fontawesome.io/icons.
 
 [[menu.icon]]
-    url = "mailto:me@example.com"
+    url = "mailto:ann.wang@utexas.edu"
     name = "envelope-o"
     weight = 1
 
 [[menu.icon]]
-    url = "https://github.com/username/"
+    url = "https://github.com/ann-DIY/"
     name = "github"
     weight = 2
 
 [[menu.icon]]
-    url = "https://twitter.com/username/"
-    name = "twitter"
-    weight = 3
-
-[[menu.icon]]
-    url = "https://www.linkedin.com/in/username/"
+    url = "https://www.linkedin.com/in/ann-wang-aw29983/"
     name = "linkedin"
-    weight = 4
+    weight = 3
 
