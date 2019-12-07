@@ -17,7 +17,8 @@
       <pubDate>Wed, 02 Apr 2014 00:00:00 +0000</pubDate>
       
       <guid>/blog/</guid>
-      <description>This is my Blog Post! One interesting thing I have learned in python is how to find specific sequences/patterns in strings with the re.findall function. While it was difficult getting the hang of it at first, it gradually became more like a game.</description>
+      <description>This is my Blog Post! One interesting thing I have learned in python is how to find specific sequences/patterns in strings with the re.findall function. While it was difficult getting the hang of it at first, it gradually became more like a game. Below is an example from homework 11 in which we were asked to extract certain text from the string using the function re.findall.
+import restring4=r&amp;#34;We try to quantitatively capture these characteristics by defining a set of indexes,\which can be computed using the mosaic image and the corresponding ground trut h: \\begin{itemize} \\item $\mu_{A_T}$ and $\sigma_{A_T}$, the mean and standard deviation of t he tiles area $A_T$, respectively; \\item $\rho_\text{filler}$, the ratio between the filler area and the over all mosaic are, computed as \$\rho_\text{filler}=\frac{\sum_{T \in \mathcal{T} A_T}}{A}$, being $A$ the are a of the mosaic; \\item \todo{does it worth?</description>
     </item>
     
   </channel>
