@@ -38,7 +38,7 @@ googleAnalytics = ""
     weight = 4
     
 [[menu.main]]
-    url = "/hugoisforlovers/"
+    url = "/blog/"
     name = "Blog Post"
     weight = 5
 
